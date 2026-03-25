@@ -1,303 +1,251 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BookForge</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:#0e0c0a; --surface:#161412; --surface2:#1e1b18; --border:#2a2520;
-  --accent:#c8a96e; --accent2:#8b6f42; --text:#e8e0d4; --muted:#7a6f62;
-  --dim:#4a4238; --ok:#6b9e78; --err:#c47070;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(200,169,110,.07) 0%,transparent 70%);pointer-events:none;z-index:0}
-.wrap{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:56px 24px 80px}
-header{text-align:center;margin-bottom:52px}
-.logo{display:inline-block;width:44px;height:44px;margin-bottom:18px}
-h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,5vw,2.8rem);font-weight:700;letter-spacing:-.02em}
-h1 em{color:var(--accent);font-style:italic}
-.tagline{margin-top:10px;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.rule{width:56px;height:1px;margin:18px auto 0;background:linear-gradient(90deg,transparent,var(--accent2),transparent)}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:36px;margin-bottom:18px;position:relative}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent2),transparent)}
-.drop{border:1px dashed var(--border);border-radius:2px;padding:44px 20px;text-align:center;cursor:pointer;transition:all .25s;background:var(--surface2)}
-.drop:hover,.drop.over{border-color:var(--accent2);background:#1a1714}
-.drop-icon{font-size:2.2rem;display:block;margin-bottom:10px}
-.drop-main{font-family:'Playfair Display',serif;font-size:1.05rem;margin-bottom:4px}
-.drop-sub{font-size:.75rem;color:var(--muted);letter-spacing:.05em}
-#file-input{display:none}
-.file-badge{display:none;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:12px 16px;margin-top:14px}
-.file-badge.show{display:flex}
-.file-badge-name{font-family:'DM Mono',monospace;font-size:.8rem;color:var(--accent);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.file-badge-size{font-size:.72rem;color:var(--muted);white-space:nowrap}
-.field{margin-top:20px;display:flex;flex-direction:column;gap:6px}
-.field label{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.field input{background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s}
-.field input:focus{border-color:var(--accent2)}
-.field input::placeholder{color:var(--dim)}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookForge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    :root {
+      --bg: #0e0c0a;
+      --surface: #161412;
+      --surface2: #1e1b18;
+      --border: #2a2520;
+      --accent: #c8a96e;
+      --accent2: #8b6f42;
+      --text: #e8e0d4;
+      --muted: #7a6f62;
+      --dim: #4a4238;
+      --ok: #6b9e78;
+      --err: #c47070;
+    }
 
-/* MOD SEÇİCİ */
-.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
-.mode-card{border:1px solid var(--border);border-radius:2px;padding:16px;cursor:pointer;transition:all .2s;background:var(--surface2);position:relative}
-.mode-card:hover{border-color:var(--accent2)}
-.mode-card.selected{border-color:var(--accent);background:rgba(139,111,66,.12)}
-.mode-card input[type=radio]{display:none}
-.mode-title{font-family:'Playfair Display',serif;font-size:.95rem;margin-bottom:4px;color:var(--text)}
-.mode-desc{font-size:.72rem;color:var(--muted);line-height:1.5}
-.mode-badge{position:absolute;top:10px;right:10px;font-size:.65rem;font-family:'DM Mono',monospace;padding:2px 6px;border-radius:2px;text-transform:uppercase;letter-spacing:.06em}
-.badge-new{background:rgba(107,158,120,.15);color:var(--ok);border:1px solid rgba(107,158,120,.3)}
-.badge-adv{background:rgba(200,169,110,.12);color:var(--accent);border:1px solid rgba(200,169,110,.25)}
-
-/* reflow seçenekleri */
-.reflow-opts{display:none;margin-top:16px}
-.reflow-opts.show{display:block}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:0}
-.opt{display:flex;flex-direction:column;gap:6px}
-.opt label{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-select{background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);padding:10px 32px 10px 12px;font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none;cursor:pointer;transition:border-color .2s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a6f62' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
-select:focus{border-color:var(--accent2)}
-
-.btn{width:100%;margin-top:26px;padding:15px;background:linear-gradient(135deg,#c8a96e,#8b6f42);border:none;border-radius:2px;color:#0e0c0a;font-family:'Playfair Display',serif;font-size:.98rem;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:all .25s}
-.btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,169,110,.2)}
-.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
-#prog{display:none}
-#prog.show{display:block}
-.prog-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.prog-title{font-family:'Playfair Display',serif;font-size:1.05rem}
-.spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.logbox{background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:14px 16px;font-family:'DM Mono',monospace;font-size:.76rem;color:var(--muted);line-height:1.9;min-height:72px;max-height:150px;overflow-y:auto}
-.log-line{opacity:0;animation:fi .3s forwards}
-@keyframes fi{to{opacity:1}}
-#result{display:none}
-#result.show{display:block}
-.res-title{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--ok);margin-bottom:4px}
-.res-sub{font-size:.78rem;color:var(--muted);margin-bottom:22px}
-.dl-list{display:flex;flex-direction:column;gap:10px}
-.dl-btn{display:flex;align-items:center;gap:14px;padding:15px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);text-decoration:none;font-size:.86rem;transition:all .2s}
-.dl-btn:hover{border-color:var(--accent2);background:rgba(139,111,66,.08);transform:translateX(4px)}
-.badge{padding:3px 8px;border-radius:2px;font-family:'DM Mono',monospace;font-size:.68rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
-.b-epub{background:rgba(107,158,120,.13);color:var(--ok);border:1px solid rgba(107,158,120,.3)}
-.b-pdf{background:rgba(200,169,110,.11);color:var(--accent);border:1px solid rgba(200,169,110,.25)}
-.dl-name{flex:1;font-family:'DM Mono',monospace;font-size:.78rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.err-box{color:var(--err);font-size:.84rem;background:rgba(196,112,112,.08);border:1px solid rgba(196,112,112,.2);border-radius:2px;padding:12px 15px}
-.btn-reset{margin-top:18px;padding:9px 18px;background:transparent;border:1px solid var(--border);border-radius:2px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer;transition:all .2s}
-.btn-reset:hover{border-color:var(--muted);color:var(--text)}
-footer{text-align:center;margin-top:44px;color:var(--dim);font-size:.72rem;letter-spacing:.06em}
-footer a{color:var(--accent2);text-decoration:none}
-@media(max-width:500px){.card{padding:24px 18px}.mode-grid,.opts{grid-template-columns:1fr}}
-</style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+  </style>
 </head>
+
 <body>
-<div class="wrap">
-  <header>
-    <svg class="logo" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="6" y="3" width="24" height="34" rx="1" stroke="#c8a96e" stroke-width="1.4"/>
-      <rect x="10" y="3" width="24" height="34" rx="1" stroke="#8b6f42" stroke-width="1.4" fill="#161412"/>
-      <line x1="16" y1="12" x2="28" y2="12" stroke="#c8a96e" stroke-width=".9" stroke-opacity=".6"/>
-      <line x1="16" y1="17" x2="28" y2="17" stroke="#c8a96e" stroke-width=".9" stroke-opacity=".4"/>
-      <line x1="16" y1="22" x2="24" y2="22" stroke="#c8a96e" stroke-width=".9" stroke-opacity=".3"/>
-    </svg>
-    <h1>Book<em>Forge</em></h1>
-    <p class="tagline">PDF → A5 Dönüştürücü · Saf Python</p>
-    <div class="rule"></div>
-  </header>
+  <div class="wrap">
+    <header>
+      <svg class="logo" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="3" width="24" height="34" rx="1" stroke="#c8a96e" stroke-width="1.4" />
+        <rect x="10" y="3" width="24" height="34" rx="1" stroke="#8b6f42" stroke-width="1.4" fill="#161412" />
+        <line x1="16" y1="12" x2="28" y2="12" stroke="#c8a96e" stroke-width=".9" stroke-opacity=".6" />
+        <line x1="16" y1="17" x2="28" y2="17" stroke="#c8a96e" stroke-width=".9" stroke-opacity=".4" />
+        <line x1="16" y1="22" x2="24" y2="22" stroke="#c8a96e" stroke-width=".9" stroke-opacity=".3" />
+      </svg>
+      <h1>Book<em>Forge</em></h1>
+      <p class="tagline">PDF → A5 Dönüştürücü · Saf Python</p>
+      <div class="rule"></div>
+    </header>
 
-  <div class="card" id="upload-card">
-    <div class="drop" id="drop" onclick="document.getElementById('file-input').click()">
-      <span class="drop-icon">📄</span>
-      <p class="drop-main">PDF dosyasını buraya sürükle</p>
-      <p class="drop-sub">veya tıkla · Maks 200 MB</p>
-    </div>
-    <input type="file" id="file-input" accept=".pdf">
-    <div class="file-badge" id="file-badge">
-      <span style="font-size:1.3rem">📕</span>
-      <span class="file-badge-name" id="fname"></span>
-      <span class="file-badge-size" id="fsize"></span>
-    </div>
+    <div class="card" id="upload-card">
+      <div class="drop" id="drop" onclick="document.getElementById('file-input').click()">
+        <span class="drop-icon">📄</span>
+        <p class="drop-main">PDF dosyasını buraya sürükle</p>
+        <p class="drop-sub">veya tıkla · Maks 200 MB</p>
+      </div>
+      <input type="file" id="file-input" accept=".pdf">
+      <div class="file-badge" id="file-badge">
+        <span style="font-size:1.3rem">📕</span>
+        <span class="file-badge-name" id="fname"></span>
+        <span class="file-badge-size" id="fsize"></span>
+      </div>
 
-    <div class="field">
-      <label>Kitap Adı <span style="color:var(--dim)">(opsiyonel)</span></label>
-      <input type="text" id="title-input" placeholder="Boş bırakırsan dosya adından alınır">
-    </div>
+      <div class="field">
+        <label>Kitap Adı <span style="color:var(--dim)">(opsiyonel)</span></label>
+        <input type="text" id="title-input" placeholder="Boş bırakırsan dosya adından alınır">
+      </div>
 
-    <!-- MOD SEÇİCİ -->
-    <div style="margin-top:20px;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Dönüşüm Modu</div>
-    <div class="mode-grid">
-      <label class="mode-card selected" onclick="setMode('preserve')">
-        <input type="radio" name="mode" value="preserve" checked>
-        <span class="mode-badge badge-new">Önerilen</span>
-        <div class="mode-title">🎨 Orijinal Görünüm</div>
-        <div class="mode-desc">Kapak, resimler ve sayfa stili korunur. OCR ile metin aranabilir olur. A5 boyutuna küçültülür.</div>
-      </label>
-      <label class="mode-card" onclick="setMode('reflow')">
-        <input type="radio" name="mode" value="reflow">
-        <span class="mode-badge badge-adv">Gelişmiş</span>
-        <div class="mode-title">📖 Roman Stili</div>
-        <div class="mode-desc">Metin yeniden düzenlenir. EPUB ve temiz roman formatı PDF oluşturulur.</div>
-      </label>
-    </div>
+      <!-- MOD SEÇİCİ -->
+      <div
+        style="margin-top:20px;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">
+        Dönüşüm Modu</div>
+      <div class="mode-grid">
+        <label class="mode-card selected" onclick="setMode('preserve')">
+          <input type="radio" name="mode" value="preserve" checked>
+          <span class="mode-badge badge-new">Önerilen</span>
+          <div class="mode-title">🎨 Orijinal Görünüm</div>
+          <div class="mode-desc">Kapak, resimler ve sayfa stili korunur. OCR ile metin aranabilir olur. A5 boyutuna
+            küçültülür.</div>
+        </label>
+        <label class="mode-card" onclick="setMode('reflow')">
+          <input type="radio" name="mode" value="reflow">
+          <span class="mode-badge badge-adv">Gelişmiş</span>
+          <div class="mode-title">📖 Roman Stili</div>
+          <div class="mode-desc">Metin yeniden düzenlenir. EPUB ve temiz roman formatı PDF oluşturulur.</div>
+        </label>
+      </div>
 
-    <!-- Reflow seçenekleri -->
-    <div class="reflow-opts" id="reflow-opts">
-      <div class="opts" style="margin-top:16px">
+      <!-- Reflow seçenekleri -->
+      <div class="reflow-opts" id="reflow-opts">
+        <div class="opts" style="margin-top:16px">
+          <div class="opt">
+            <label>Dil</label>
+            <select id="lang">
+              <option value="tur+eng">Türkçe + English</option>
+              <option value="tur">Sadece Türkçe</option>
+              <option value="eng">Sadece English</option>
+            </select>
+          </div>
+          <div class="opt">
+            <label>Çıktı</label>
+            <select id="fmt">
+              <option value="both">EPUB + A5 PDF</option>
+              <option value="epub">Sadece EPUB</option>
+              <option value="pdf">Sadece A5 PDF</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preserve dil seçimi -->
+      <div id="preserve-lang" style="margin-top:16px">
         <div class="opt">
-          <label>Dil</label>
-          <select id="lang">
+          <label>OCR Dili</label>
+          <select id="lang-preserve">
             <option value="tur+eng">Türkçe + English</option>
             <option value="tur">Sadece Türkçe</option>
             <option value="eng">Sadece English</option>
           </select>
         </div>
-        <div class="opt">
-          <label>Çıktı</label>
-          <select id="fmt">
-            <option value="both">EPUB + A5 PDF</option>
-            <option value="epub">Sadece EPUB</option>
-            <option value="pdf">Sadece A5 PDF</option>
-          </select>
-        </div>
       </div>
+
+      <button class="btn" id="btn" onclick="go()" disabled>Dönüştür →</button>
     </div>
 
-    <!-- Preserve dil seçimi -->
-    <div id="preserve-lang" style="margin-top:16px">
-      <div class="opt">
-        <label>OCR Dili</label>
-        <select id="lang-preserve">
-          <option value="tur+eng">Türkçe + English</option>
-          <option value="tur">Sadece Türkçe</option>
-          <option value="eng">Sadece English</option>
-        </select>
+    <div class="card" id="prog">
+      <div class="prog-head">
+        <span class="prog-title">İşleniyor…</span>
+        <div class="spin" id="spin"></div>
       </div>
+      <div class="logbox" id="logbox"></div>
     </div>
 
-    <button class="btn" id="btn" onclick="go()" disabled>Dönüştür →</button>
-  </div>
-
-  <div class="card" id="prog">
-    <div class="prog-head">
-      <span class="prog-title">İşleniyor…</span>
-      <div class="spin" id="spin"></div>
+    <div class="card" id="result">
+      <div id="result-inner"></div>
+      <button class="btn-reset" onclick="reset()">← Yeni dosya</button>
     </div>
-    <div class="logbox" id="logbox"></div>
+
+    <footer>BookForge · pymupdf + pytesseract + ebooklib + reportlab · <a href="https://github.com"
+        target="_blank">GitHub →</a></footer>
   </div>
 
-  <div class="card" id="result">
-    <div id="result-inner"></div>
-    <button class="btn-reset" onclick="reset()">← Yeni dosya</button>
-  </div>
+  <script>
+    let file = null, currentMode = 'preserve', poll = null;
 
-  <footer>BookForge · pymupdf + pytesseract + ebooklib + reportlab · <a href="https://github.com" target="_blank">GitHub →</a></footer>
-</div>
+    const drop = document.getElementById('drop');
+    const fi = document.getElementById('file-input');
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over') });
+    drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+    drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); const f = e.dataTransfer.files[0]; if (f?.name.toLowerCase().endsWith('.pdf')) setFile(f) });
+    fi.addEventListener('change', () => fi.files[0] && setFile(fi.files[0]));
 
-<script>
-let file=null, currentMode='preserve', poll=null;
+    function setFile(f) {
+      file = f;
+      document.getElementById('fname').textContent = f.name;
+      document.getElementById('fsize').textContent = fmt(f.size);
+      document.getElementById('file-badge').classList.add('show');
+      document.getElementById('btn').disabled = false;
+    }
+    function fmt(b) { return b < 1048576 ? (b / 1024).toFixed(0) + ' KB' : (b / 1048576).toFixed(1) + ' MB' }
 
-const drop=document.getElementById('drop');
-const fi=document.getElementById('file-input');
-drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
-drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
-drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');const f=e.dataTransfer.files[0];if(f?.name.toLowerCase().endsWith('.pdf'))setFile(f)});
-fi.addEventListener('change',()=>fi.files[0]&&setFile(fi.files[0]));
+    function setMode(m) {
+      currentMode = m;
+      document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById('reflow-opts').classList.toggle('show', m === 'reflow');
+      document.getElementById('preserve-lang').style.display = m === 'preserve' ? 'block' : 'none';
+    }
 
-function setFile(f){
-  file=f;
-  document.getElementById('fname').textContent=f.name;
-  document.getElementById('fsize').textContent=fmt(f.size);
-  document.getElementById('file-badge').classList.add('show');
-  document.getElementById('btn').disabled=false;
-}
-function fmt(b){return b<1048576?(b/1024).toFixed(0)+' KB':(b/1048576).toFixed(1)+' MB'}
+    async function go() {
+      if (!file) return;
+      const title = document.getElementById('title-input').value.trim();
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('mode', currentMode);
+      fd.append('title', title);
+      if (currentMode === 'preserve') {
+        fd.append('lang', document.getElementById('lang-preserve').value);
+      } else {
+        const fmtVal = document.getElementById('fmt').value;
+        fd.append('lang', document.getElementById('lang').value);
+        fd.append('epub', (fmtVal === 'both' || fmtVal === 'epub') ? 'true' : 'false');
+        fd.append('pdf', (fmtVal === 'both' || fmtVal === 'pdf') ? 'true' : 'false');
+      }
+      document.getElementById('upload-card').style.cssText = 'opacity:.35;pointer-events:none';
+      document.getElementById('prog').classList.add('show');
+      document.getElementById('logbox').innerHTML = '';
+      try {
+        const res = await fetch('/convert', { method: 'POST', body: fd });
+        const d = await res.json();
+        if (d.error) { showErr(d.error); return }
+        startPoll(d.job_id);
+      } catch (e) { showErr('Bağlantı hatası: ' + e.message) }
+    }
 
-function setMode(m){
-  currentMode=m;
-  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
-  document.getElementById('reflow-opts').classList.toggle('show', m==='reflow');
-  document.getElementById('preserve-lang').style.display = m==='preserve' ? 'block' : 'none';
-}
+    function startPoll(id) {
+      let last = 0;
+      poll = setInterval(async () => {
+        try {
+          const d = await (await fetch(`/status/${id}`)).json();
+          const box = document.getElementById('logbox');
+          (d.log || []).slice(last).forEach(line => {
+            const el = document.createElement('div');
+            el.className = 'log-line'; el.textContent = line;
+            box.appendChild(el); box.scrollTop = box.scrollHeight;
+          });
+          last = (d.log || []).length;
+          if (d.status === 'done') { clearInterval(poll); document.getElementById('spin').style.display = 'none'; showDone(d.outputs, id) }
+          else if (d.status === 'error') { clearInterval(poll); showErr(d.error || 'Bilinmeyen hata') }
+        } catch (_) { }
+      }, 1000);
+    }
 
-async function go(){
-  if(!file) return;
-  const title=document.getElementById('title-input').value.trim();
-  const fd=new FormData();
-  fd.append('file',file);
-  fd.append('mode',currentMode);
-  fd.append('title',title);
-  if(currentMode==='preserve'){
-    fd.append('lang',document.getElementById('lang-preserve').value);
-  } else {
-    const fmtVal=document.getElementById('fmt').value;
-    fd.append('lang',document.getElementById('lang').value);
-    fd.append('epub',(fmtVal==='both'||fmtVal==='epub')?'true':'false');
-    fd.append('pdf',(fmtVal==='both'||fmtVal==='pdf')?'true':'false');
-  }
-  document.getElementById('upload-card').style.cssText='opacity:.35;pointer-events:none';
-  document.getElementById('prog').classList.add('show');
-  document.getElementById('logbox').innerHTML='';
-  try{
-    const res=await fetch('/convert',{method:'POST',body:fd});
-    const d=await res.json();
-    if(d.error){showErr(d.error);return}
-    startPoll(d.job_id);
-  } catch(e){showErr('Bağlantı hatası: '+e.message)}
-}
-
-function startPoll(id){
-  let last=0;
-  poll=setInterval(async()=>{
-    try{
-      const d=await(await fetch(`/status/${id}`)).json();
-      const box=document.getElementById('logbox');
-      (d.log||[]).slice(last).forEach(line=>{
-        const el=document.createElement('div');
-        el.className='log-line';el.textContent=line;
-        box.appendChild(el);box.scrollTop=box.scrollHeight;
-      });
-      last=(d.log||[]).length;
-      if(d.status==='done'){clearInterval(poll);document.getElementById('spin').style.display='none';showDone(d.outputs,id)}
-      else if(d.status==='error'){clearInterval(poll);showErr(d.error||'Bilinmeyen hata')}
-    }catch(_){}
-  },1000);
-}
-
-function showDone(outputs,id){
-  document.getElementById('result').classList.add('show');
-  document.getElementById('result-inner').innerHTML=`
+    function showDone(outputs, id) {
+      document.getElementById('result').classList.add('show');
+      document.getElementById('result-inner').innerHTML = `
     <div class="res-title">✦ Tamamlandı</div>
     <div class="res-sub">${outputs.length} dosya hazır</div>
-    <div class="dl-list">${outputs.map(o=>`
+    <div class="dl-list">${outputs.map(o => `
       <a class="dl-btn" href="/download/${id}/${o.name}" download="${o.name}">
         <span class="badge b-${o.type}">${o.type.toUpperCase()}</span>
         <span class="dl-name">${o.name}</span>
         <span style="color:var(--dim)">↓</span>
       </a>`).join('')}</div>`;
-}
+    }
 
-function showErr(msg){
-  document.getElementById('result').classList.add('show');
-  document.getElementById('result-inner').innerHTML=`
+    function showErr(msg) {
+      document.getElementById('result').classList.add('show');
+      document.getElementById('result-inner').innerHTML = `
     <div class="res-title" style="color:var(--err)">Hata</div>
     <div class="err-box">${msg}</div>`;
-}
+    }
 
-function reset(){
-  if(poll)clearInterval(poll);
-  file=null;
-  document.getElementById('upload-card').style.cssText='';
-  document.getElementById('prog').classList.remove('show');
-  document.getElementById('result').classList.remove('show');
-  document.getElementById('file-badge').classList.remove('show');
-  document.getElementById('btn').disabled=true;
-  document.getElementById('spin').style.display='block';
-  document.getElementById('logbox').innerHTML='';
-  fi.value='';
-}
-</script>
+    function reset() {
+      if (poll) clearInterval(poll);
+      file = null;
+      document.getElementById('upload-card').style.cssText = '';
+      document.getElementById('prog').classList.remove('show');
+      document.getElementById('result').classList.remove('show');
+      document.getElementById('file-badge').classList.remove('show');
+      document.getElementById('btn').disabled = true;
+      document.getElementById('spin').style.display = 'block';
+      document.getElementById('logbox').innerHTML = '';
+      fi.value = '';
+    }
+  </script>
 </body>
+
 </html>
